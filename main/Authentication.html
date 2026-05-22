@@ -158,18 +158,19 @@
 
             if (matchedUser && matchedUser.password === passwordInput) {
                 currentUserSession = matchedUser;
-                
+    
+                // SAVE TO LOCAL STORAGE HERE
+                localStorage.setItem('loggedUserFirstName', matchedUser.firstName);
+                localStorage.setItem('loggedUserLastName', matchedUser.lastName);
+
                 messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-green-50 text-green-700 border border-green-200";
                 messageBox.innerHTML = `Success! Logged in as ${matchedUser.firstName}`;
                 messageBox.classList.remove('hidden-view');
 
-                // State transition delay simulator
                 setTimeout(() => {
-                    alert(`Proceeding to Main Booking Dashboard as: ${currentUserSession.firstName} ${currentUserSession.lastName}`);
-                    // When ready, point this location swap to Page 4:
-                    // window.location.href = 'dashboard.html';
+                // Change this path to match your dashboard filename
+                window.location.href = 'dashboard.html'; 
                 }, 1000);
-
             } else {
                 messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-red-50 text-red-700 border border-red-200";
                 messageBox.innerHTML = "Invalid email credentials or missing user profile.";

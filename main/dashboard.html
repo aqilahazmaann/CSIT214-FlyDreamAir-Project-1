@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDreamAir - Main Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blurple: '#4F46E5', // Primary Accent
+                        safetyOrange: '#F97316' // Secondary Accent
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Hiding scrollbars for sleek bottom navigation dock styling */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-28">
+
+    <script>
+        // Global mock flights array matching international/domestic requirement
+        const mockFlightsDatabase = [
+            { id: "FDA-101", origin: "SYD", destination: "MEL", date: "2026-06-15", price: 142.00, time: "08:30 AM" },
+            { id: "FDA-202", origin: "LHR", destination: "CDG", date: "2026-06-15", price: 142.00, time: "09:45 AM" }, // Matches mockup receipt values
+            { id: "FDA-303", origin: "SYD", destination: "NRT", date: "2026-06-16", price: 450.00, time: "11:15 PM" },
+            { id: "FDA-404", origin: "LAX", destination: "HNL", date: "2026-06-18", price: 290.00, time: "02:00 PM" }
+        ];
+
+        // Fallback session state if accessed directly without going through Page 1 login
+        // Replace your old activeSessionUser variable with this:
+        let activeSessionUser = {
+            firstName: localStorage.getItem('loggedUserFirstName') || "John",
+            lastName: localStorage.getItem('loggedUserLastName') || "Traveler",
+            tier: "PREMIUM MEMBER"
+        };
+
+        // Add this block at the very end of your dashboard script section to inject the names:
+        window.onload = function() {
+        const fullName = `${activeSessionUser.firstName} ${activeSessionUser.lastName}`;
+    
+            // Update the text strings in the top header bar dynamically
+            document.getElementById('user-name-label').innerText = fullName;
+    
+            // Dynamically generate the two-letter initials icon (e.g., "JD" for John Doe)
+            const initials = `${activeSessionUser.firstName.charAt(0)}${activeSessionUser.lastName.charAt(0)}`.toUpperCase();
+            const avatarBlock = document.querySelector('.h-9.w-9.bg-blurple\\/10');
+            if (avatarBlock) {
+                avatarBlock.innerText = initials;
+            }
+        };
+    </script>
+
+    <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blurple text-white p-2 rounded-xl shadow-md shadow-indigo-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <span class="font-bold text-gray-900 tracking-tight text-lg">FLY DREAM</span>
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <div class="hidden md:flex items-center space-x-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <span>Search Flights, Hot</span>
+            </div>
+            <div class="text-gray-400 hover:text-gray-600 relative cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-safetyOrange"></span>
+            </div>
+            <div class="flex items-center space-x-3 border-l border-gray-100 pl-6">
+                <div class="text-right">
+                    <div id="user-tier-label" class="text-[9px] font-bold text-blurple tracking-widest uppercase">PREMIUM MEMBER</div>
+                    <div id="user-name-label" class="text-xs font-semibold text-gray-800">John Traveler</div>
+                </div>
+                <div class="h-9 w-9 bg-blurple/10 text-blurple rounded-xl flex items-center justify-center font-bold text-sm">
+                    JT
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 mt-10">
+        <div class="flex flex-col md:flex-row md:items-baseline justify-between mb-8 space-y-2 md:space-y-0">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Where to <span class="text-blurple">next?</span></h1>
+            <div class="bg-white border border-gray-100 rounded-2xl py-2 px-4 shadow-sm flex items-center space-x-3 max-w-max">
+                <span class="text-xl">🌤️</span>
+                <div class="text-left">
+                    <div class="text-[9px] font-bold text-gray-400 tracking-widest uppercase leading-none">Local Weather</div>
+                    <div class="text-xs font-bold text-gray-800 mt-0.5">London, 22°C</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="bg-white border border-gray-100 shadow-xl shadow-gray-100/50 rounded-3xl p-4 mb-12">
+            <form onsubmit="executeFlightSearch(event)" class="flex flex-col lg:flex-row items-stretch gap-2">
+                <div class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center">
+                    <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Departure From</label>
+                    <input type="text" id="search-origin" required placeholder="London Heathrow (LHR)" 
+                           class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none placeholder-gray-300 w-full">
+                </div>
+                <div class="hidden lg:flex items-center justify-center text-gray-300 px-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </div>
+                <div class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center">
+                    <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Destination To</label>
+                    <input type="text" id="search-destination" required placeholder="Where are you flying?" 
+                           class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none placeholder-gray-300 w-full">
+                </div>
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center min-w-[160px]">
+                    <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Departure Date</label>
+                    <input type="date" id="search-date" required value="2026-06-15"
+                           class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none text-gray-500">
+                </div>
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center min-w-[130px]">
+                    <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Travelers</label>
+                    <select id="search-passengers" class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none cursor-pointer">
+                        <option value="1">01 Person</option>
+                        <option value="2">02 People</option>
+                        <option value="3">03 People</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-blurple hover:bg-indigo-700 text-white rounded-2xl px-8 py-4 lg:py-0 font-semibold transition-all flex items-center justify-center space-x-2 shadow-lg shadow-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <span class="lg:hidden">Search Flights</span>
+                </button>
+            </form>
+        </section>
+
+        <section id="search-results-section" class="mb-12 hidden">
+            <h2 class="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Available Flights Found</h2>
+            <div id="results-target-grid" class="space-y-3">
+                </div>
+        </section>
+
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xs font-bold text-gray-400 tracking-widest uppercase">Recommended for you</h2>
+                <button class="text-blurple hover:underline text-xs font-semibold">View all destinations &rarr;</button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80" alt="Tokyo" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$450</div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="font-bold text-lg tracking-tight">Tokyo</h3>
+                        <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">Japan</p>
+                    </div>
+                </div>
+                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80" alt="Paris" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$142</div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="font-bold text-lg tracking-tight">Paris</h3>
+                        <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">France</p>
+                    </div>
+                </div>
+                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=500&q=80" alt="New York" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$380</div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="font-bold text-lg tracking-tight">New York</h3>
+                        <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">USA</p>
+                    </div>
+                </div>
+                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=500&q=80" alt="Bali" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$220</div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="font-bold text-lg tracking-tight">Bali</h3>
+                        <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">Indonesia</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+        <nav class="bg-gray-900/90 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl py-3 px-6 flex items-center justify-between text-white text-xs font-semibold tracking-wide uppercase">
+            <button onclick="handleNav('book')" class="flex items-center space-x-2 text-blurple border-b-2 border-blurple pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <span>Book Flight</span>
+            </button>
+            <button onclick="handleNav('reservations')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 002-2H3a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>Reservations</span>
+            </button>
+            <button onclick="handleNav('services')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <span>Services</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // Execute Flight Queries Matching (FR-02)
+        function executeFlightSearch(e) {
+            e.preventDefault();
+            
+            const orig = document.getElementById('search-origin').value.trim().toUpperCase();
+            const dest = document.getElementById('search-destination').value.trim().toUpperCase();
+            const resultsSection = document.getElementById('search-results-section');
+            const targetGrid = document.getElementById('results-target-grid');
+
+            // Clear previous outputs
+            targetGrid.innerHTML = "";
+
+            // Filter our JavaScript database array dynamically
+            // Relaxed filter mapping: checks if strings are contained or codes match
+            const matches = mockFlightsDatabase.filter(flight => 
+                (flight.origin.includes(orig) || orig.includes(flight.origin)) &&
+                (flight.destination.includes(dest) || dest.includes(flight.destination))
+            );
+
+            if (matches.length > 0) {
+                matches.forEach(flight => {
+                    const row = document.createElement('div');
+                    row.className = "bg-white border border-gray-100 hover:border-blurple p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between shadow-sm transition-all";
+                    row.innerHTML = `
+                        <div class="flex items-center space-x-6 w-full sm:w-auto mb-4 sm:mb-0">
+                            <div class="bg-indigo-50 text-blurple h-10 w-10 rounded-xl flex items-center justify-center font-bold text-xs uppercase">
+                                ${flight.id.split('-')[0]}
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div>
+                                    <div class="text-lg font-bold text-gray-900">${flight.origin}</div>
+                                    <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Departure</div>
+                                </div>
+                                <div class="text-gray-300 font-light">&rarr;</div>
+                                <div>
+                                    <div class="text-lg font-bold text-gray-900">${flight.destination}</div>
+                                    <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Arrival</div>
+                                </div>
+                            </div>
+                            <div class="border-l border-gray-100 pl-6 hidden md:block">
+                                <div class="text-xs font-semibold text-gray-800">${flight.time}</div>
+                                <div class="text-[10px] text-gray-400 font-medium">Scheduled Time</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50">
+                            <div class="text-right">
+                                <div class="text-lg font-extrabold text-gray-900">$${flight.price.toFixed(2)}</div>
+                                <div class="text-[9px] font-bold text-safetyOrange tracking-widest uppercase">Per Traveler</div>
+                            </div>
+                            <button onclick="selectFlight('${flight.id}')" class="bg-blurple hover:bg-indigo-700 text-white font-semibold text-xs py-2.5 px-5 rounded-xl transition-all shadow-md shadow-indigo-100">
+                                Select Flight
+                            </button>
+                        </div>
+                    `;
+                    targetGrid.appendChild(row);
+                });
+            } else {
+                targetGrid.innerHTML = `
+                    <div class="bg-gray-100 text-gray-500 rounded-2xl p-8 text-center text-sm font-medium border border-dashed border-gray-200">
+                        No scheduled route patterns found matching your search entries. Try entering "LHR" to "CDG".
+                    </div>
+                `;
+            }
+
+            resultsSection.classList.remove('hidden');
+            // Smoothly snap focus down onto matches area
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Handle Selecting Flight and Stepping into Booking States
+        function selectFlight(id) {
+            alert(`Flight selection locked: ${id}. State transitioning downstream to Page 5: Interactive Seat Selection Map canvas.`);
+            // When built, point this location transition route directly to Page 5:
+            // window.location.href = 'seat-selection.html?flight=' + id;
+        }
+
+        // Simple Nav Indicator Handling
+        function handleNav(tab) {
+            alert(`Navigation request dispatched to view: [${tab.toUpperCase()}]. Active view loop maintained on current dashboard context frame.`);
+        }
+    </script>
+</body>
+</html>

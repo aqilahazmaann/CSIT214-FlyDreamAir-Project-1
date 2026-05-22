@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDreamAir - Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blurple: '#4F46E5', // Primary Accent [cite: 206]
+                        safetyOrange: '#F97316' // Secondary Accent [cite: 206]
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+    <script>
+        // Pre-populating with the mockup user data from your file [cite: 231, 233]
+        const mockUserDatabase = [
+            { firstName: 'John', lastName: 'Doe', email: 'john@example.com', password: 'password123' },
+            { firstName: 'Jane', lastName: 'Smith', email: 'jane@world.com', password: 'password123' }
+        ];
+
+        let currentUserSession = null;
+    </script>
+
+    <div id="login-view" class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100 flex flex-col items-center">
+        <div class="bg-blurple text-white p-3 rounded-2xl mb-4 shadow-md shadow-indigo-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        </div>
+        
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">FlyDreamAir</h1>
+        <p class="text-xs text-gray-400 font-medium tracking-widest uppercase mt-1 mb-8">Welcome back, Traveler</p>
+
+        <div id="login-message" class="w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 hidden-view"></div>
+
+        <form id="login-form" class="w-full space-y-5" onsubmit="handleLogin(event)">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Email Address</label>
+                <input type="email" id="login-email" required placeholder="name@example.com" 
+                       class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-blurple text-gray-800 placeholder-gray-300 transition-all">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Password</label>
+                <input type="password" id="login-password" required placeholder="••••••••" 
+                       class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-blurple text-gray-800 placeholder-gray-300 transition-all">
+            </div>
+
+            <button type="submit" class="w-full bg-blurple hover:bg-indigo-700 text-white font-semibold py-3.5 px-4 rounded-xl text-sm shadow-lg shadow-indigo-100 transition-all flex items-center justify-center space-x-2 mt-4">
+                <span>Sign In</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </button>
+        </form>
+
+        <div class="mt-8 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Not a member? 
+            <button onclick="switchView('registration-view')" class="text-blurple hover:underline ml-1">Register Now</button>
+        </div>
+
+        <button onclick="routeToAdmin()" class="mt-6 text-[10px] font-bold text-gray-300 tracking-widest uppercase hover:text-gray-500 transition-all">
+            🛠️ Login as Administration
+        </button>
+    </div>
+
+
+    <div id="registration-view" class="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100 hidden-view">
+        
+        <div class="md:w-[40%] bg-safetyOrange p-8 flex flex-col justify-between text-white relative min-h-[200px] md:min-h-[450px]">
+            <div class="bg-white/20 backdrop-blur-md p-2 w-10 h-10 flex items-center justify-center rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold tracking-tight leading-none mb-2">Start<br>your<br>journey.</h2>
+                <p class="text-xs text-orange-100 font-medium">Join FlyDreamAir and explore the world with ease.</p>
+            </div>
+            <div class="text-[9px] tracking-widest text-orange-200/50 uppercase font-bold">FDA Version 1.0</div>
+        </div>
+
+        <div class="md:w-[60%] p-8 flex flex-col justify-center">
+            <h2 class="text-xl font-bold text-gray-900 tracking-tight mb-6">Create Account</h2>
+            
+            <div id="reg-message" class="w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 hidden-view"></div>
+
+            <form id="reg-form" class="space-y-4" onsubmit="handleRegistration(event)">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">First Name</label>
+                        <input type="text" id="reg-firstname" required placeholder="John" 
+                               class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-safetyOrange text-gray-800 placeholder-gray-300 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Last Name</label>
+                        <input type="text" id="reg-lastname" required placeholder="Doe" 
+                               class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-safetyOrange text-gray-800 placeholder-gray-300 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Email Address</label>
+                    <input type="email" id="reg-email" required placeholder="john@example.com" 
+                           class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-safetyOrange text-gray-800 placeholder-gray-300 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••" 
+                           class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-safetyOrange text-gray-800 placeholder-gray-300 transition-all">
+                </div>
+
+                <button type="submit" class="w-full bg-safetyOrange hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-xl text-sm shadow-lg shadow-orange-100 transition-all flex items-center justify-center space-x-2 pt-4">
+                    <span>Create My Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Already have an account? 
+                <button onclick="switchView('login-view')" class="text-safetyOrange hover:underline ml-1">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Core View Switcher Utility Engine
+        function switchView(viewId) {
+            document.getElementById('login-view').classList.add('hidden-view');
+            document.getElementById('registration-view').classList.add('hidden-view');
+            
+            document.getElementById(viewId).classList.remove('hidden-view');
+        }
+
+        // Action 1: Handle User Login Process (FR-01)
+        function handleLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('login-email').value.trim();
+            const passwordInput = document.getElementById('login-password').value;
+            const messageBox = document.getElementById('login-message');
+
+            // Scan local data store array
+            const matchedUser = mockUserDatabase.find(u => u.email.toLowerCase() === emailInput.toLowerCase());
+
+            if (matchedUser && matchedUser.password === passwordInput) {
+                currentUserSession = matchedUser;
+                
+                messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-green-50 text-green-700 border border-green-200";
+                messageBox.innerHTML = `Success! Logged in as ${matchedUser.firstName}`;
+                messageBox.classList.remove('hidden-view');
+
+                // State transition delay simulator
+                setTimeout(() => {
+                    alert(`Proceeding to Main Booking Dashboard as: ${currentUserSession.firstName} ${currentUserSession.lastName}`);
+                    // When ready, point this location swap to Page 4:
+                    // window.location.href = 'dashboard.html';
+                }, 1000);
+
+            } else {
+                messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-red-50 text-red-700 border border-red-200";
+                messageBox.innerHTML = "Invalid email credentials or missing user profile.";
+                messageBox.classList.remove('hidden-view');
+            }
+        }
+
+        // Action 2: Handle New User Registration Process (FR-01)
+        function handleRegistration(e) {
+            e.preventDefault();
+            const fName = document.getElementById('reg-firstname').value.trim();
+            const lName = document.getElementById('reg-lastname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const messageBox = document.getElementById('reg-message');
+
+            // Uniqueness Constraint Validation Engine
+            const userExists = mockUserDatabase.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+            if (userExists) {
+                messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-red-50 text-red-700 border border-red-200";
+                messageBox.innerHTML = "Account registration failed. This email is already tied to a user.";
+                messageBox.classList.remove('hidden-view');
+                return;
+            }
+
+            // Append straight into runtime memory stack
+            mockUserDatabase.push({
+                firstName: fName,
+                lastName: lName,
+                email: email,
+                password: password
+            });
+
+            messageBox.className = "w-full text-center text-sm font-semibold p-3 rounded-xl mb-4 bg-green-50 text-green-700 border border-green-200";
+            messageBox.innerHTML = "Profile authorized! Snapping to authentication gateway...";
+            messageBox.classList.remove('hidden-view');
+
+            document.getElementById('reg-form').reset();
+
+            // Flash routing delay to send them back to login page
+            setTimeout(() => {
+                switchView('login-view');
+                document.getElementById('login-email').value = email;
+                messageBox.classList.add('hidden-view');
+            }, 1500);
+        }
+
+        // Action 3: Administrative Bypasser Route
+        function routeToAdmin() {
+            alert("Routing directly to back-office systems administration panel workspace canvas.");
+            // Destination anchor block for final phase construction
+        }
+    </script>
+</body>
+</html>

@@ -31,27 +31,20 @@
         // Global mock flights array matching international/domestic requirement
         const mockFlightsDatabase = [
             { id: "FDA-101", origin: "SYD", destination: "MEL", date: "2026-06-15", price: 142.00, time: "08:30 AM" },
-            { id: "FDA-202", origin: "LHR", destination: "CDG", date: "2026-06-15", price: 142.00, time: "09:45 AM" }, // Matches mockup receipt values
+            { id: "FDA-202", origin: "LHR", destination: "CDG", date: "2026-06-15", price: 142.00, time: "09:45 AM" },
             { id: "FDA-303", origin: "SYD", destination: "NRT", date: "2026-06-16", price: 450.00, time: "11:15 PM" },
             { id: "FDA-404", origin: "LAX", destination: "HNL", date: "2026-06-18", price: 290.00, time: "02:00 PM" }
         ];
 
-        // Fallback session state if accessed directly without going through Page 1 login
-        // Replace your old activeSessionUser variable with this:
         let activeSessionUser = {
             firstName: localStorage.getItem('loggedUserFirstName') || "John",
             lastName: localStorage.getItem('loggedUserLastName') || "Traveler",
             tier: "PREMIUM MEMBER"
         };
 
-        // Add this block at the very end of your dashboard script section to inject the names:
         window.onload = function() {
-        const fullName = `${activeSessionUser.firstName} ${activeSessionUser.lastName}`;
-    
-            // Update the text strings in the top header bar dynamically
+            const fullName = `${activeSessionUser.firstName} ${activeSessionUser.lastName}`;
             document.getElementById('user-name-label').innerText = fullName;
-    
-            // Dynamically generate the two-letter initials icon (e.g., "JD" for John Doe)
             const initials = `${activeSessionUser.firstName.charAt(0)}${activeSessionUser.lastName.charAt(0)}`.toUpperCase();
             const avatarBlock = document.querySelector('.h-9.w-9.bg-blurple\\/10');
             if (avatarBlock) {
@@ -71,10 +64,12 @@
         </div>
 
         <div class="flex items-center space-x-6">
-            <div class="hidden md:flex items-center space-x-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                <span>Search Flights, Hot</span>
-            </div>
+            
+            <form onsubmit="searchFlightById(event)" class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-200 focus-within:ring-2 focus-within:ring-blurple transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input type="text" id="flight-id-input" placeholder="Search Flight ID (e.g. FDA-101)" class="bg-transparent text-xs font-semibold text-gray-700 placeholder-gray-400 focus:outline-none w-52">
+            </form>
+
             <div class="text-gray-400 hover:text-gray-600 relative cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                 <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-safetyOrange"></span>
@@ -104,7 +99,7 @@
         </div>
 
         <section class="bg-white border border-gray-100 shadow-xl shadow-gray-100/50 rounded-3xl p-4 mb-12">
-            <form onsubmit="executeFlightSearch(event)" class="flex flex-col lg:flex-row items-stretch gap-2">
+            <form onsubmit="executeFlightSearch(event)" id="main-search-form" class="flex flex-col lg:flex-row items-stretch gap-2">
                 <div class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center">
                     <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Departure From</label>
                     <input type="text" id="search-origin" required placeholder="London Heathrow (LHR)" 
@@ -123,14 +118,13 @@
                     <input type="date" id="search-date" required value="2026-06-15"
                            class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none text-gray-500">
                 </div>
+                
                 <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 flex flex-col justify-center min-w-[130px]">
                     <label class="block text-[9px] font-bold text-gray-400 tracking-wider uppercase mb-1">Travelers</label>
-                    <select id="search-passengers" class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none cursor-pointer">
-                        <option value="1">01 Person</option>
-                        <option value="2">02 People</option>
-                        <option value="3">03 People</option>
-                    </select>
+                    <input type="number" id="search-passengers" required value="1" min="1" max="10" onchange="updateDynamicPrices()"
+                           class="bg-transparent font-semibold text-gray-800 text-sm focus:outline-none placeholder-gray-300 w-full" placeholder="Enter amount">
                 </div>
+
                 <button type="submit" class="bg-blurple hover:bg-indigo-700 text-white rounded-2xl px-8 py-4 lg:py-0 font-semibold transition-all flex items-center justify-center space-x-2 shadow-lg shadow-indigo-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     <span class="lg:hidden">Search Flights</span>
@@ -141,7 +135,7 @@
         <section id="search-results-section" class="mb-12 hidden">
             <h2 class="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Available Flights Found</h2>
             <div id="results-target-grid" class="space-y-3">
-                </div>
+            </div>
         </section>
 
         <section>
@@ -151,7 +145,7 @@
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                <div onclick="showRecommendedModal('FDA-303', 'SYD', 'NRT', 450.00, '2026-06-16', '11:15 PM')" class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80" alt="Tokyo" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
                     <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$450</div>
@@ -160,7 +154,7 @@
                         <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">Japan</p>
                     </div>
                 </div>
-                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                <div onclick="showRecommendedModal('FDA-202', 'LHR', 'CDG', 142.00, '2026-06-15', '09:45 AM')" class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80" alt="Paris" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
                     <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$142</div>
@@ -169,7 +163,7 @@
                         <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">France</p>
                     </div>
                 </div>
-                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                <div onclick="showRecommendedModal('FDA-505', 'SYD', 'JFK', 380.00, '2026-06-20', '06:00 AM')" class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=500&q=80" alt="New York" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
                     <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$380</div>
@@ -178,7 +172,7 @@
                         <p class="text-[10px] text-gray-300 font-medium uppercase tracking-wider mt-0.5">USA</p>
                     </div>
                 </div>
-                <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
+                <div onclick="showRecommendedModal('FDA-606', 'SYD', 'DPS', 220.00, '2026-06-22', '10:00 AM')" class="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 relative h-72 cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=500&q=80" alt="Bali" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
                     <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent"></div>
                     <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white font-bold text-xs py-1.5 px-3 rounded-full border border-white/10">$220</div>
@@ -208,21 +202,99 @@
         </nav>
     </div>
 
+    <div id="recommended-modal" data-base-price="0" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full mx-4 relative">
+            <button onclick="closeRecommendedModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 bg-gray-100 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blurple" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Flight Details
+            </h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Flight ID</span>
+                    <span id="modal-flight-id" class="font-bold text-blurple bg-indigo-50 px-2 py-0.5 rounded"></span>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Route</span>
+                    <span class="font-bold text-gray-800"><span id="modal-origin"></span> &rarr; <span id="modal-dest"></span></span>
+                </div>
+                
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Date & Time</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-600 text-sm" id="modal-date"></span>
+                        <select id="modal-time-select" class="bg-gray-100 border border-gray-200 rounded text-xs px-2 py-1 font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blurple cursor-pointer">
+                            </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Travelers</span>
+                    <span id="modal-traveler-count" class="font-bold text-gray-800"></span>
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Checkout Price</span>
+                    <span id="modal-price" class="text-2xl font-black text-safetyOrange"></span>
+                </div>
+            </div>
+            <button id="modal-purchase-btn" class="w-full bg-blurple hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-100 flex items-center justify-center space-x-2">
+                <span>Proceed to Seat Selection</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+    </div>
+
     <script>
-        // Execute Flight Queries Matching (FR-02)
+        // NEW FEATURE: Search Flight By ID
+        function searchFlightById(e) {
+            e.preventDefault();
+            const inputId = document.getElementById('flight-id-input').value.trim().toUpperCase();
+            
+            // Look for match in database
+            const foundFlight = mockFlightsDatabase.find(f => f.id === inputId);
+            
+            if (foundFlight) {
+                // If found, open it in the recommended modal with its base details
+                showRecommendedModal(foundFlight.id, foundFlight.origin, foundFlight.destination, foundFlight.price, foundFlight.date, foundFlight.time);
+            } else {
+                alert("Flight ID '" + inputId + "' not found. Try searching codes like FDA-101 or FDA-303.");
+            }
+        }
+
+        // Keep UI Prices updated if user changes the traveler input while viewing results
+        function updateDynamicPrices() {
+            // Update search results if they are visible
+            if (!document.getElementById('search-results-section').classList.contains('hidden')) {
+                // re-trigger the form search to recalculate results
+                document.getElementById('main-search-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+            
+            // Update modal if it's currently open
+            const modal = document.getElementById('recommended-modal');
+            if (!modal.classList.contains('hidden')) {
+                const basePrice = parseFloat(modal.getAttribute('data-base-price'));
+                const travelers = parseInt(document.getElementById('search-passengers').value) || 1;
+                document.getElementById('modal-traveler-count').innerText = travelers + (travelers > 1 ? " People" : " Person");
+                document.getElementById('modal-price').innerText = "$" + (basePrice * travelers).toFixed(2);
+            }
+        }
+
+        // Execute Flight Queries Matching
         function executeFlightSearch(e) {
             e.preventDefault();
             
             const orig = document.getElementById('search-origin').value.trim().toUpperCase();
             const dest = document.getElementById('search-destination').value.trim().toUpperCase();
+            const travelers = parseInt(document.getElementById('search-passengers').value) || 1; // Read traveler count
+            
             const resultsSection = document.getElementById('search-results-section');
             const targetGrid = document.getElementById('results-target-grid');
 
-            // Clear previous outputs
             targetGrid.innerHTML = "";
 
-            // Filter our JavaScript database array dynamically
-            // Relaxed filter mapping: checks if strings are contained or codes match
             const matches = mockFlightsDatabase.filter(flight => 
                 (flight.origin.includes(orig) || orig.includes(flight.origin)) &&
                 (flight.destination.includes(dest) || dest.includes(flight.destination))
@@ -230,6 +302,8 @@
 
             if (matches.length > 0) {
                 matches.forEach(flight => {
+                    const totalPrice = (flight.price * travelers).toFixed(2); // NEW FEATURE: Calculate total price
+                    
                     const row = document.createElement('div');
                     row.className = "bg-white border border-gray-100 hover:border-blurple p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between shadow-sm transition-all";
                     row.innerHTML = `
@@ -255,8 +329,8 @@
                         </div>
                         <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50">
                             <div class="text-right">
-                                <div class="text-lg font-extrabold text-gray-900">$${flight.price.toFixed(2)}</div>
-                                <div class="text-[9px] font-bold text-safetyOrange tracking-widest uppercase">Per Traveler</div>
+                                <div class="text-lg font-extrabold text-gray-900">$${totalPrice}</div>
+                                <div class="text-[9px] font-bold text-safetyOrange tracking-widest uppercase">Total for ${travelers}</div>
                             </div>
                             <button onclick="selectFlight('${flight.id}')" class="bg-blurple hover:bg-indigo-700 text-white font-semibold text-xs py-2.5 px-5 rounded-xl transition-all shadow-md shadow-indigo-100">
                                 Select Flight
@@ -274,20 +348,82 @@
             }
 
             resultsSection.classList.remove('hidden');
-            // Smoothly snap focus down onto matches area
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Handle Selecting Flight and Stepping into Booking States
+        // Handle Selecting Flight from Search Grid
         function selectFlight(id) {
-            alert(`Flight selection locked: ${id}. State transitioning downstream to Page 5: Interactive Seat Selection Map canvas.`);
-            // When built, point this location transition route directly to Page 5:
-            // window.location.href = 'seat-selection.html?flight=' + id;
+            const selectedFlightData = mockFlightsDatabase.find(f => f.id === id);
+            const travelers = parseInt(document.getElementById('search-passengers').value) || 1;
+    
+            if (selectedFlightData) {
+                // Ensure dynamic price calculation and seat bridge requirement are stored
+                localStorage.setItem('checkoutFlightId', selectedFlightData.id);
+                localStorage.setItem('checkoutFlightOrigin', selectedFlightData.origin);
+                localStorage.setItem('checkoutFlightDestination', selectedFlightData.destination);
+                localStorage.setItem('checkoutFlightPrice', (selectedFlightData.price * travelers).toFixed(2));
+                localStorage.setItem('checkoutFlightTime', selectedFlightData.time);
+                
+                // Expose traveler count to the Seat Selection page
+                localStorage.setItem('checkoutTravelers', travelers);
+            }
+
+            window.location.href = 'booking-assets.html';
         }
 
-        // Simple Nav Indicator Handling
+        // Handle recommended modal display
+        function showRecommendedModal(id, origin, dest, basePrice, date, defaultTime) {
+            const travelers = parseInt(document.getElementById('search-passengers').value) || 1;
+            
+            // Store base price secretly so we can recalculate if travelers change while modal is open
+            document.getElementById('recommended-modal').setAttribute('data-base-price', basePrice);
+            
+            // Populate modal text fields
+            document.getElementById('modal-flight-id').innerText = id;
+            document.getElementById('modal-origin').innerText = origin;
+            document.getElementById('modal-dest').innerText = dest;
+            document.getElementById('modal-date').innerText = date;
+            document.getElementById('modal-traveler-count').innerText = travelers + (travelers > 1 ? " People" : " Person");
+            document.getElementById('modal-price').innerText = "$" + (basePrice * travelers).toFixed(2);
+            
+            // Populate Time Dropdown
+            const timeSelect = document.getElementById('modal-time-select');
+            timeSelect.innerHTML = `
+                <option value="${defaultTime}">${defaultTime} (Optimal)</option>
+                <option value="06:00 AM">06:00 AM</option>
+                <option value="12:30 PM">12:30 PM</option>
+                <option value="05:15 PM">05:15 PM</option>
+                <option value="09:45 PM">09:45 PM</option>
+                <option value="11:30 PM">11:30 PM</option>
+            `;
+            
+            // Hook up the purchase button
+            document.getElementById('modal-purchase-btn').onclick = function() {
+                const finalTravelers = parseInt(document.getElementById('search-passengers').value) || 1;
+                const selectedTime = timeSelect.value;
+                
+                // Write fully configured values to browser bridge
+                localStorage.setItem('checkoutFlightId', id);
+                localStorage.setItem('checkoutFlightOrigin', origin);
+                localStorage.setItem('checkoutFlightDestination', dest);
+                localStorage.setItem('checkoutFlightPrice', (basePrice * finalTravelers).toFixed(2));
+                localStorage.setItem('checkoutFlightTime', selectedTime); // The newly selected time
+                
+                // IMPORTANT: Expose to Seat Selection Page logic
+                localStorage.setItem('checkoutTravelers', finalTravelers); 
+
+                window.location.href = 'booking-assets.html';
+            };
+            
+            document.getElementById('recommended-modal').classList.remove('hidden');
+        }
+
+        function closeRecommendedModal() {
+            document.getElementById('recommended-modal').classList.add('hidden');
+        }
+
         function handleNav(tab) {
-            alert(`Navigation request dispatched to view: [${tab.toUpperCase()}]. Active view loop maintained on current dashboard context frame.`);
+            alert(`Navigation request dispatched to view: [${tab.toUpperCase()}].`);
         }
     </script>
 </body>

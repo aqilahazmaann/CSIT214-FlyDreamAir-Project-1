@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -206,4 +207,214 @@
         }
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDreamAir - Checkout & Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blurple: '#4F46E5',
+                        safetyOrange: '#F97316'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-28">
+
+    <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blurple text-white p-2 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <span class="font-bold text-gray-900 tracking-tight text-lg">FLY DREAM</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="text-right">
+                <div class="text-[9px] font-bold text-blurple tracking-widest uppercase">PREMIUM MEMBER</div>
+                <div id="header-username" class="text-xs font-semibold text-gray-800">John Traveler</div>
+            </div>
+            <div id="header-initials" class="h-9 w-9 bg-blurple/10 text-blurple rounded-xl flex items-center justify-center font-bold text-sm">JT</div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 mt-12">
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+            
+            <div class="w-full md:flex-1 bg-white border border-gray-100 rounded-3xl p-8 shadow-sm space-y-6">
+                <h2 class="text-xl font-bold text-gray-900 tracking-tight">Payment Details</h2>
+                
+                <form id="payment-core-form" onsubmit="processTransaction(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Card Number</label>
+                        <div class="relative">
+                            <input type="text" required maxlength="19" placeholder="•••• •••• •••• 4242" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-blurple text-gray-800 placeholder-gray-300 transition-all font-mono">
+                            <span class="absolute right-4 top-3.5 text-xs text-gray-400">💳</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Expiry Date</label>
+                            <input type="text" required maxlength="5" placeholder="12/28" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-blurple text-gray-800 placeholder-gray-300 transition-all font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">CVC</label>
+                            <input type="password" required maxlength="3" placeholder="•••" 
+                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-blurple text-gray-800 placeholder-gray-300 transition-all font-mono">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-safetyOrange hover:bg-orange-600 text-white font-bold py-4 px-4 rounded-xl text-sm uppercase tracking-wider shadow-lg shadow-orange-100 transition-all flex items-center justify-center space-x-2 mt-6">
+                        <span id="cta-button-text">Pay $0.00</span>
+                    </button>
+                </form>
+
+                <div class="flex items-center justify-center space-x-6 text-[10px] font-bold text-gray-400 tracking-widest uppercase pt-2 border-t border-gray-50">
+                    <div class="flex items-center space-x-1"><span>🔒</span><span>SSL SECURE</span></div>
+                    <div class="flex items-center space-x-1"><span>🛡️</span><span>ENCRYPTED</span></div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-80 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold text-gray-400 tracking-widest uppercase border-b border-gray-50 pb-2">Order Summary</h3>
+                
+                <div class="space-y-3 text-xs font-medium text-gray-600">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-gray-800 font-bold" id="receipt-flight-route">Flight (LHR - CDG)</div>
+                            <div class="text-[9px] text-gray-400 font-semibold" id="receipt-flight-id">FDA-101</div>
+                        </div>
+                        <span class="font-extrabold text-gray-900" id="receipt-flight-price">$0.00</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-gray-800 font-bold">Seat Reservation</div>
+                            <div class="text-[9px] text-gray-400 font-semibold" id="receipt-seat-code">Code: None</div>
+                        </div>
+                        <span class="font-extrabold text-gray-900" id="receipt-seat-price">$0.00</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-gray-800 font-bold">In-Flight Services</div>
+                            <div class="text-[9px] text-gray-400 font-semibold">Ancillaries Add-on</div>
+                        </div>
+                        <span class="font-extrabold text-gray-900" id="receipt-services-price">$0.00</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 flex justify-between items-baseline">
+                        <span class="text-xs font-bold text-gray-900 uppercase">Total Amount</span>
+                        <span id="receipt-gross-total" class="text-2xl font-black text-blurple">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+        <nav class="bg-gray-900/90 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl py-3 px-6 flex items-center justify-between text-white text-xs font-semibold tracking-wide uppercase">
+            <button onclick="handleNav('book')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <span>Book Flight</span>
+            </button>
+            <button onclick="handleNav('reservations')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 002-2H3a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>Reservations</span>
+            </button>
+            <button onclick="handleNav('services')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <span>Services</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // Global Calculation Scope Variables
+        let grossCalculatedTotal = 0.00;
+
+        window.onload = function() {
+            // Identity Initialization
+            const fName = localStorage.getItem('loggedUserFirstName') || "John";
+            const lName = localStorage.getItem('loggedUserLastName') || "Traveler";
+            document.getElementById('header-username').innerText = `${fName} ${lName}`;
+            document.getElementById('header-initials').innerText = `${fName.charAt(0)}${lName.charAt(0)}`.toUpperCase();
+
+            // Load Values from previous state layers
+            const flId = localStorage.getItem('checkoutFlightId') || "FDA-101";
+            const flOrig = localStorage.getItem('checkoutFlightOrigin') || "LHR";
+            const flDest = localStorage.getItem('checkoutFlightDestination') || "CDG";
+            const flPrice = parseFloat(localStorage.getItem('checkoutFlightPrice') || "142.00");
+            
+            const seatCode = localStorage.getItem('checkoutSeatCode') || "3A";
+            const seatPrice = parseFloat(localStorage.getItem('checkoutSeatPrice') || "12.00");
+            
+            const servicesPrice = parseFloat(localStorage.getItem('checkoutServicesSum') || "15.00");
+
+            // Compile mathematical gross ledger totals
+            grossCalculatedTotal = flPrice + seatPrice + servicesPrice;
+
+            // Render text string bindings into layout views
+            document.getElementById('receipt-flight-route').innerText = `Flight (${flOrig} - ${flDest})`;
+            document.getElementById('receipt-flight-id').innerText = flId;
+            document.getElementById('receipt-flight-price').innerText = `$${flPrice.toFixed(2)}`;
+
+            document.getElementById('receipt-seat-code').innerText = `Code: ${seatCode}`;
+            document.getElementById('receipt-seat-price').innerText = `$${seatPrice.toFixed(2)}`;
+
+            document.getElementById('receipt-services-price').innerText = `$${servicesPrice.toFixed(2)}`;
+            
+            // Final total bindings
+            document.getElementById('receipt-gross-total').innerText = `$${grossCalculatedTotal.toFixed(2)}`;
+            document.getElementById('cta-button-text').innerText = `Pay $${grossCalculatedTotal.toFixed(2)}`;
+        }
+
+        // Process Mock Checkout Submission
+        function processTransaction(e) {
+            e.preventDefault();
+
+            const confirmedReservation = {
+                id: localStorage.getItem('checkoutFlightId') || "FDA-101",
+                origin: localStorage.getItem('checkoutFlightOrigin') || "LHR",
+                destination: localStorage.getItem('checkoutFlightDestination') || "CDG",
+                date: "Dec 12, 2026", 
+                time: localStorage.getItem('checkoutFlightTime') || "09:45 AM",
+                seat: localStorage.getItem('checkoutSeatCode') || "3A",
+                reference: "#RES-" + Math.floor(1000 + Math.random() * 9000), 
+                status: "CONFIRMED"
+            };
+
+            const ongoingBookingsList = JSON.parse(localStorage.getItem('globalReservationsDatabase') || "[]");
+            ongoingBookingsList.push(confirmedReservation);
+            localStorage.setItem('globalReservationsDatabase', JSON.stringify(ongoingBookingsList));
+
+            alert("Transaction authorized successfully! Invoice receipt generated into application memory state. Routing to Page 7: My Reservations.");
+    
+            // UPDATE THIS LINE TO POINT NATIVELY TO YOUR RESERVATIONS FILENAME:
+            window.location.href = 'reservations.html';
+        }
+
+        function handleNav(tab) {
+            if (tab === 'book') window.location.href = 'dashboard.html';
+            if (tab === 'services') window.location.href = 'booking-assets.html';
+        }
+    </script>
+</body>
+>>>>>>> b8e42654f9a7b95c741f9df0a6a956150feecf93
 </html>

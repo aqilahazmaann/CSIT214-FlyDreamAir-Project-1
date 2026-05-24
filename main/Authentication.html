@@ -71,7 +71,7 @@
             <button onclick="switchView('registration-view')" class="text-blurple hover:underline ml-1">Register Now</button>
         </div>
 
-        <button onclick="routeToAdmin()" class="mt-6 text-[10px] font-bold text-gray-300 tracking-widest uppercase hover:text-gray-500 transition-all">
+        <button onclick="handleAdminLogin()" class="mt-6 text-[10px] font-bold text-gray-300 tracking-widest uppercase hover:text-gray-500 transition-all">
             🛠️ Login as Administration
         </button>
     </div>
@@ -220,9 +220,22 @@
         }
 
         // Action 3: Administrative Bypasser Route
-        function routeToAdmin() {
-            alert("Routing directly to back-office systems administration panel workspace canvas.");
-            // Destination anchor block for final phase construction
+        function handleAdminLogin() {
+            // Basic prompt for credentials
+            const adminEmail = prompt("Enter Admin Email:");
+            const adminPass = prompt("Enter Admin Password:");
+
+            // Hardcoded credentials
+            const VALID_ADMIN_EMAIL = "admin@flydreamair.com";
+            const VALID_ADMIN_PASS = "password123";
+
+            if (adminEmail === VALID_ADMIN_EMAIL && adminPass === VALID_ADMIN_PASS) {
+                // Set the auth flag in local storage
+                localStorage.setItem('isAdminAuthenticated', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                alert("Access Denied: Invalid admin credentials.");
+            }
         }
     </script>
 </body>

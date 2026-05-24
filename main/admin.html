@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDreamAir - Back-Office Systems Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blurple: '#4F46E5',
+                        safetyOrange: '#F97316'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gray-900 text-white p-2 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <div>
+                <span class="font-bold text-gray-900 tracking-tight text-base">FLY DREAM</span>
+                <span class="bg-gray-100 text-gray-500 text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 uppercase tracking-wider">Systems Administration</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button onclick="logoutAdmin()" class="text-xs font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest">
+                Logout
+            </button>
+            
+            <a href="dashboard.html" class="text-xs font-bold text-blurple hover:text-indigo-700 transition-colors flex items-center space-x-1">
+                <span>&larr;</span> <span>Exit to Live App</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 mt-10 space-y-10">
+        
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase block">Total Customers</span>
+                    <span id="kpi-total-users" class="text-3xl font-extrabold text-gray-900 tracking-tight">2</span>
+                    <span class="text-[10px] text-green-500 font-bold tracking-wide uppercase block mt-1">📈 +14% Active</span>
+                </div>
+                <div class="h-12 w-12 bg-indigo-50 text-blurple rounded-2xl flex items-center justify-center text-xl">👤</div>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase block">Active Bookings</span>
+                    <span id="kpi-total-bookings" class="text-3xl font-extrabold text-gray-900 tracking-tight">1</span>
+                    <span class="text-[10px] text-green-500 font-bold tracking-wide uppercase block mt-1">📈 +5% Scheduled</span>
+                </div>
+                <div class="h-12 w-12 bg-orange-50 text-safetyOrange rounded-2xl flex items-center justify-center text-xl">🎫</div>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase block">Gross Flight Revenue</span>
+                    <span id="kpi-total-revenue" class="text-3xl font-extrabold text-gray-900 tracking-tight">$169.00</span>
+                    <span class="text-[10px] text-amber-500 font-bold tracking-wide uppercase block mt-1">⚠️ Live Calculations</span>
+                </div>
+                <div class="h-12 w-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-xl">💰</div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-50 pb-4">
+                <div>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Live Booking Manifest</h2>
+                    <p class="text-xs text-gray-400 font-medium">Tracks every ticket selection logged via checkout pipelines.</p>
+                </div>
+                <input type="text" id="manifest-search" oninput="filterManifestTable()" placeholder="Search Reference or Route..." 
+                       class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-blurple font-semibold text-gray-700 w-full sm:w-64">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-100 text-gray-400 font-bold uppercase tracking-wider text-[9px]">
+                            <th class="pb-3 pl-2">Reference</th>
+                            <th class="pb-3">Flight ID</th>
+                            <th class="pb-3">Route Pattern</th>
+                            <th class="pb-3">Date / Time</th>
+                            <th class="pb-3">Seats Allocated</th>
+                            <th class="pb-3 text-right pr-2">Status Flag</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-manifest-tbody" class="divide-y divide-gray-50 text-gray-700 font-medium">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Customer Profiling Registry</h2>
+                <p class="text-xs text-gray-400 font-medium">Audits user authorization credentials loaded inside local runtime environments.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-100 text-gray-400 font-bold uppercase tracking-wider text-[9px]">
+                            <th class="pb-3 pl-2">Customer Profile Name</th>
+                            <th class="pb-3">Email Access Coordinates</th>
+                            <th class="pb-3">System Access Passcode</th>
+                            <th class="pb-3">Operational Status</th>
+                            <th class="pb-3 text-right pr-2">Account Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-user-tbody" class="divide-y divide-gray-50 text-gray-700 font-medium">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+
+        // SECURITY GATEKEEPER: Prevent unauthorized access
+        (function() {
+            const isAdmin = localStorage.getItem('isAdminAuthenticated');
+            if (isAdmin !== 'true') {
+                window.location.href = 'Authentication.html';
+            }
+        })();
+
+        // Function to handle logout
+        function logoutAdmin() {
+            localStorage.removeItem('isAdminAuthenticated');
+            window.location.href = 'Authentication.html';
+        }
+
+
+        let manifestReservations = [];
+        let systemUsersList = [];
+
+        window.onload = function() {
+            compileSystemDataState();
+        }
+
+        // Core compilation logic scraping browser layer arrays
+        function compileSystemDataState() {
+            // 1. Scrape structural flight booking list arrays
+            manifestReservations = JSON.parse(localStorage.getItem('globalReservationsDatabase') || "[]");
+            
+            // Seed base configuration manifest object if storage track is fresh
+            if (manifestReservations.length === 0) {
+                manifestReservations.push({
+                    id: "FDA-202",
+                    origin: "LHR",
+                    destination: "CDG",
+                    date: "Dec 12, 2026",
+                    time: "09:45 AM",
+                    seat: "3A",
+                    reference: "#RES-1029",
+                    status: "CONFIRMED"
+                });
+            }
+
+            // 2. Load registered user directory data caches
+            // Pre-populates baseline user mock metadata fields matching original specs
+            systemUsersList = JSON.parse(localStorage.getItem('adminUserDirectoryCache') || "[]");
+            if (systemUsersList.length === 0) {
+                systemUsersList = [
+                    { firstName: 'John', lastName: 'Doe', email: 'john@example.com', pass: 'password123', status: 'ACTIVE' },
+                    { firstName: 'Jane', lastName: 'Smith', email: 'jane@world.com', pass: 'password123', status: 'ACTIVE' },
+                    { firstName: 'Robert', lastName: 'Brown', email: 'rob@dev.co', pass: 'password123', status: 'SUSPENDED' }
+                ];
+                localStorage.setItem('adminUserDirectoryCache', JSON.stringify(systemUsersList));
+            }
+
+            // 3. Dynamically append newly registered user account if a live user session exists
+            const freshLoginEmail = localStorage.getItem('loggedUserFirstName');
+            if (freshLoginEmail) {
+                const freshLastName = localStorage.getItem('loggedUserLastName') || "User";
+                const freshEmail = `${freshLoginEmail.toLowerCase()}@example.com`;
+                
+                // Prevent duplicate register rows on loop refreshes
+                if (!systemUsersList.some(u => u.firstName.toLowerCase() === freshLoginEmail.toLowerCase())) {
+                    systemUsersList.push({
+                        firstName: freshLoginEmail,
+                        lastName: freshLastName,
+                        email: freshEmail,
+                        pass: 'password123',
+                        status: 'ACTIVE'
+                    });
+                    localStorage.setItem('adminUserDirectoryCache', JSON.stringify(systemUsersList));
+                }
+            }
+
+            // Execute line-item metrics recalculations
+            calculateDynamicMetrics();
+            
+            // Render structured table interfaces
+            renderManifestTableRows(manifestReservations);
+            renderUserTableRows();
+        }
+
+        // Recalculates gross values based on tracking data records
+        function calculateDynamicMetrics() {
+            document.getElementById('kpi-total-users').innerText = systemUsersList.length;
+            document.getElementById('kpi-total-bookings').innerText = manifestReservations.length;
+
+            // Compute math summations: assume base cost + $12 seat calculation for manifest logs
+            let grandRevenue = 0;
+            manifestReservations.forEach(ticket => {
+                // If the booking came through payment.html, read its variables; else fallback to flat mockup rates
+                grandRevenue += 169.00; 
+            });
+
+            document.getElementById('kpi-total-revenue').innerText = `$${grandRevenue.toFixed(2)}`;
+        }
+
+        // Render functions parsing booking manifests
+        function renderManifestTableRows(dataArray) {
+            const tbody = document.getElementById('admin-manifest-tbody');
+            tbody.innerHTML = "";
+
+            if (dataArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-300 italic">No reservation profiles match filter.</td></tr>`;
+                return;
+            }
+
+            dataArray.forEach(ticket => {
+                const badgeStyle = ticket.status === 'CONFIRMED' ? 'bg-indigo-50 text-blurple' : 'bg-amber-50 text-amber-600';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3.5 pl-2 font-mono font-bold text-gray-400">${ticket.reference}</td>
+                    <td class="py-3.5 font-bold text-blurple">${ticket.id}</td>
+                    <td class="py-3.5 font-semibold text-gray-900">${ticket.origin} &rarr; ${ticket.destination}</td>
+                    <td class="py-3.5">
+                        <div class="text-gray-800">${ticket.date}</div>
+                        <div class="text-[10px] text-gray-400">${ticket.time}</div>
+                    </td>
+                    <td class="py-3.5 font-mono text-gray-500 font-bold">${ticket.seat}</td>
+                    <td class="py-3.5 text-right pr-2">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase ${badgeStyle}">${ticket.status}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render user management table loops
+        function renderUserTableRows() {
+            const tbody = document.getElementById('admin-user-tbody');
+            tbody.innerHTML = "";
+
+            systemUsersList.forEach((user, index) => {
+                const isSuspended = user.status === 'SUSPENDED';
+                const pillStyle = isSuspended ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600';
+                const actionBtn = isSuspended 
+                    ? `<button onclick="toggleUserStatus(${index}, 'ACTIVE')" class="text-green-500 hover:underline text-[11px] font-bold uppercase tracking-wider">Unsuspend</button>`
+                    : `<button onclick="toggleUserStatus(${index}, 'SUSPENDED')" class="text-red-400 hover:underline text-[11px] font-bold uppercase tracking-wider">Suspend</button>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3.5 pl-2 flex items-center space-x-3">
+                        <div class="h-7 w-7 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-xs text-gray-500">${user.firstName.charAt(0)}${user.lastName.charAt(0)}</div>
+                        <span class="font-bold text-gray-900">${user.firstName} ${user.lastName}</span>
+                    </td>
+                    <td class="py-3.5 text-gray-500">${user.email}</td>
+                    <td class="py-3.5 font-mono text-gray-300 tracking-widest select-none">••••••••</td>
+                    <td class="py-3.5">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase ${pillStyle}">${user.status}</span>
+                    </td>
+                    <td class="py-3.5 text-right pr-2">${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Administrative Mutation Controls: Suspend/Activate User Profiles
+        function toggleUserStatus(index, newStatus) {
+            systemUsersList[index].status = newStatus;
+            localStorage.setItem('adminUserDirectoryCache', JSON.stringify(systemUsersList));
+            
+            // Re-compile dashboard frames
+            calculateDynamicMetrics();
+            renderUserTableRows();
+        }
+
+        // Live text searching filtering motor
+        function filterManifestTable() {
+            const query = document.getElementById('manifest-search').value.toLowerCase().trim();
+            
+            const filtered = manifestReservations.filter(t => 
+                t.reference.toLowerCase().includes(query) ||
+                t.id.toLowerCase().includes(query) ||
+                t.origin.toLowerCase().includes(query) ||
+                t.destination.toLowerCase().includes(query)
+            );
+            
+            renderManifestTableRows(filtered);
+        }
+    </script>
+</body>
+</html>

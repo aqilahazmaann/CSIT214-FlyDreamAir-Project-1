@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyDreamAir - In-Flight Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blurple: '#4F46E5',
+                        safetyOrange: '#F97316'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #cancel-modal { transition: opacity 0.2s ease; }
+        #cancel-modal.hidden { opacity: 0; pointer-events: none; }
+
+        /* Service card add animation */
+        @keyframes addedPop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        .item-added { animation: addedPop 0.25s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-28">
+
+    <!-- ═══ CANCEL MODAL ═════════════════════════════════════════════ -->
+    <div id="cancel-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 max-w-sm w-full text-center space-y-5">
+            <div class="mx-auto w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-2xl border border-red-100">🚫</div>
+            <div>
+                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Cancel Booking?</h2>
+                <p class="text-xs text-gray-400 font-medium mt-1.5 leading-relaxed">
+                    Are you sure you want to cancel? All service selections will be <span class="text-red-500 font-bold">cleared</span> and you will be returned to the dashboard.
+                </p>
+            </div>
+            <div class="flex space-x-3 pt-1">
+                <button onclick="closeCancelModal()"
+                        class="flex-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all">
+                    Stay Here
+                </button>
+                <button onclick="confirmCancelBooking()"
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-100 transition-all">
+                    Yes, Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
+    <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blurple text-white p-2 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <span class="font-bold text-gray-900 tracking-tight text-lg">FLY DREAM</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="text-right">
+                <div class="text-[9px] font-bold text-blurple tracking-widest uppercase">PREMIUM MEMBER</div>
+                <div id="header-username" class="text-xs font-semibold text-gray-800">John Traveler</div>
+            </div>
+            <div id="header-initials" class="h-9 w-9 bg-blurple/10 text-blurple rounded-xl flex items-center justify-center font-bold text-sm">JT</div>
+        </div>
+    </header>
+
+    <!-- ═══ BREADCRUMB + CANCEL BAR ══════════════════════════════════ -->
+    <div class="max-w-6xl mx-auto px-4 mt-5">
+        <div class="flex items-center justify-between bg-white border border-gray-100 rounded-2xl px-5 py-3 shadow-sm">
+            <div class="flex items-center space-x-2 text-xs font-semibold">
+                <button onclick="window.location.href='dashboard.html'" class="text-gray-400 hover:text-blurple transition-colors">Dashboard</button>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <button onclick="window.location.href='seat-selection.html'" class="text-gray-400 hover:text-blurple transition-colors">Seat Selection</button>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <span class="text-blurple font-bold">In-Flight Services</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <span class="text-gray-300">Payment</span>
+            </div>
+            <button onclick="openCancelModal()"
+                    class="flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-100 text-red-500 font-bold text-[10px] tracking-widest uppercase px-4 py-2 rounded-xl transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <span>Cancel Booking</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ══════════════════════════════════════════════ -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+
+        <!-- Flight context pill -->
+        <div class="mb-5 flex items-center space-x-3">
+            <div class="bg-indigo-50 text-blurple font-black text-xs px-3 py-1.5 rounded-xl border border-indigo-100" id="flight-id-pill">FDA-101</div>
+            <div class="text-sm font-bold text-gray-700">
+                <span id="pill-origin">LHR</span>
+                <span class="text-gray-300 mx-1">&rarr;</span>
+                <span id="pill-dest">CDG</span>
+            </div>
+            <!-- Seat summary pill restored from storage -->
+            <div class="text-[10px] text-gray-400 font-semibold border-l border-gray-200 pl-3">
+                Seats: <span id="pill-seats" class="text-blurple font-bold">—</span>
+            </div>
+        </div>
+
+        <!-- Tab strip -->
+        <div class="flex space-x-4 mb-6 border-b border-gray-200 pb-3">
+            <!-- Seats tab — navigates back -->
+            <button id="tab-btn-seat"
+                    onclick="window.location.href='seat-selection.html'"
+                    class="text-sm font-bold text-gray-400 hover:text-gray-600 pb-2 px-1 transition-all">
+                01 Select Seats
+            </button>
+            <!-- Services tab — active -->
+            <button id="tab-btn-services"
+                    class="text-sm font-bold border-b-2 border-blurple text-blurple pb-2 px-1 transition-all">
+                02 In-Flight Services
+            </button>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+
+            <!-- ── Service menu ─────────────────────────────────────── -->
+            <div class="w-full lg:flex-1 space-y-6">
+
+                <!-- Category filter pills -->
+                <div id="filter-pills" class="flex flex-wrap gap-2">
+                    <button onclick="filterServices('all')"   id="filter-all"    class="filter-pill px-4 py-1.5 bg-gray-900 text-white font-bold text-[10px] tracking-wider uppercase rounded-full shadow-sm">All</button>
+                    <button onclick="filterServices('meals')" id="filter-meals"  class="filter-pill px-4 py-1.5 bg-white border border-gray-100 text-gray-500 font-bold text-[10px] tracking-wider uppercase rounded-full hover:bg-gray-50">Meals</button>
+                    <button onclick="filterServices('drinks')"id="filter-drinks" class="filter-pill px-4 py-1.5 bg-white border border-gray-100 text-gray-500 font-bold text-[10px] tracking-wider uppercase rounded-full hover:bg-gray-50">Drinks</button>
+                    <button onclick="filterServices('extras')"id="filter-extras" class="filter-pill px-4 py-1.5 bg-white border border-gray-100 text-gray-500 font-bold text-[10px] tracking-wider uppercase rounded-full hover:bg-gray-50">Extras</button>
+                </div>
+
+                <!-- Service cards grid -->
+                <div id="services-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+                    <!-- Meals -->
+                    <div data-category="meals" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80" alt="Gourmet Pasta" class="w-full h-32 object-cover rounded-2xl mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Gourmet Pasta</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Penne arrabbiata with parmesan</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$15.00</span>
+                                <button onclick="addAncillaryItem('Gourmet Pasta', 15.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-category="meals" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80" alt="Garden Salad" class="w-full h-32 object-cover rounded-2xl mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Garden Salad</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Fresh greens with vinaigrette</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$12.00</span>
+                                <button onclick="addAncillaryItem('Garden Salad', 12.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-category="meals" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=300&q=80" alt="Grilled Chicken" class="w-full h-32 object-cover rounded-2xl mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Grilled Chicken</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">With steamed veg & rice</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$18.00</span>
+                                <button onclick="addAncillaryItem('Grilled Chicken', 18.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Drinks -->
+                    <div data-category="drinks" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <img src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=300&q=80" alt="Red Wine" class="w-full h-32 object-cover rounded-2xl mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Red Wine (Mini)</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">187ml Shiraz or Merlot</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$15.00</span>
+                                <button onclick="addAncillaryItem('Red Wine (Mini)', 15.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-category="drinks" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=300&q=80" alt="Coffee" class="w-full h-32 object-cover rounded-2xl mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Premium Coffee</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Single-origin espresso blend</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$6.00</span>
+                                <button onclick="addAncillaryItem('Premium Coffee', 6.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extras -->
+                    <div data-category="extras" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <div class="w-full h-32 rounded-2xl mb-3 bg-indigo-50 flex items-center justify-center text-4xl">🎧</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Premium Headset</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Noise-cancelling for the journey</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$20.00</span>
+                                <button onclick="addAncillaryItem('Premium Headset', 20.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-category="extras" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <div class="w-full h-32 rounded-2xl mb-3 bg-orange-50 flex items-center justify-center text-4xl">🧳</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Extra Baggage 10kg</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Additional checked luggage</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$35.00</span>
+                                <button onclick="addAncillaryItem('Extra Baggage 10kg', 35.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-category="extras" class="service-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col justify-between p-4">
+                        <div class="w-full h-32 rounded-2xl mb-3 bg-green-50 flex items-center justify-center text-4xl">💺</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm tracking-tight">Priority Boarding</h4>
+                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Board before general passengers</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="font-extrabold text-gray-900 text-sm">$10.00</span>
+                                <button onclick="addAncillaryItem('Priority Boarding', 10.00, this)" class="h-7 w-7 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-gray-500 hover:bg-blurple hover:text-white transition-all">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ── Cart sidebar ────────────────────────────────────── -->
+            <div class="w-full lg:w-80 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-4 sticky top-24">
+
+                <!-- Seat summary read from storage -->
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 flex items-center justify-between">
+                    <div>
+                        <div class="text-[9px] font-bold text-gray-400 tracking-widest uppercase">Confirmed Seats</div>
+                        <div id="cart-seat-summary" class="text-sm font-extrabold text-blurple mt-0.5">—</div>
+                    </div>
+                    <button onclick="window.location.href='seat-selection.html'"
+                            class="text-[9px] font-bold text-gray-400 hover:text-blurple uppercase tracking-wider transition-colors">
+                        Change ✏️
+                    </button>
+                </div>
+
+                <h3 class="text-xs font-bold text-gray-400 tracking-widest uppercase border-b border-gray-50 pb-2">Selected Services</h3>
+                <div id="services-cart-list" class="space-y-2 text-xs font-semibold text-gray-600">
+                    <p class="text-gray-300 font-normal italic text-center py-4">No ancillary services added yet.</p>
+                </div>
+
+                <!-- Running total -->
+                <div class="pt-3 border-t border-gray-100 space-y-1.5">
+                    <div class="flex justify-between items-baseline text-xs">
+                        <span class="text-gray-400 font-semibold">Seat Cost</span>
+                        <span id="cart-seat-cost" class="font-bold text-gray-700">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-baseline text-xs">
+                        <span class="text-gray-400 font-semibold">Services Subtotal</span>
+                        <span id="services-cart-total" class="font-bold text-gray-700">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Proceed CTA — runs commitSelectionWorkflow -->
+                <button onclick="commitSelectionWorkflow()"
+                        class="w-full bg-safetyOrange hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-orange-100 text-center block transition-all">
+                    Proceed to Payment &rarr;
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ═══ BOTTOM NAV ════════════════════════════════════════════════ -->
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+        <nav class="bg-gray-900/90 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl py-3 px-6 flex items-center justify-between text-white text-xs font-semibold tracking-wide uppercase">
+            <button onclick="window.location.href='dashboard.html'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <span>Book Flight</span>
+            </button>
+            <button onclick="window.location.href='reservations.html'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>Reservations</span>
+            </button>
+            <button class="flex items-center space-x-2 text-blurple border-b-2 border-blurple pb-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <span>Services</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ═══ SCRIPTS ═══════════════════════════════════════════════════ -->
+    <script>
+        // ── App state ────────────────────────────────────────────────
+        const chosenServices = [];
+        let activeFilter     = 'all';
+
+        // ── Cancel modal ─────────────────────────────────────────────
+        function openCancelModal()  { document.getElementById('cancel-modal').classList.remove('hidden'); }
+        function closeCancelModal() { document.getElementById('cancel-modal').classList.add('hidden'); }
+
+        function confirmCancelBooking() {
+            ['checkoutFlightId','checkoutFlightOrigin','checkoutFlightDestination',
+             'checkoutFlightPrice','checkoutFlightTime','checkoutTravelers',
+             'checkoutSeatCode','checkoutSeatPrice',
+             'checkoutServicesSum','checkoutServicesJSON'].forEach(k => localStorage.removeItem(k));
+            window.location.href = 'dashboard.html';
+        }
+
+        // ── Initialization ───────────────────────────────────────────
+        window.onload = function() {
+            // Identity
+            const fName = localStorage.getItem('loggedUserFirstName') || "John";
+            const lName = localStorage.getItem('loggedUserLastName')  || "Traveler";
+            document.getElementById('header-username').innerText = `${fName} ${lName}`;
+            document.getElementById('header-initials').innerText = `${fName.charAt(0)}${lName.charAt(0)}`.toUpperCase();
+
+            // Flight context pill
+            document.getElementById('flight-id-pill').innerText = localStorage.getItem('checkoutFlightId')         || "FDA-101";
+            document.getElementById('pill-origin').innerText    = localStorage.getItem('checkoutFlightOrigin')     || "LHR";
+            document.getElementById('pill-dest').innerText      = localStorage.getItem('checkoutFlightDestination')|| "CDG";
+
+            // Restore seat data from localStorage
+            const seatCode  = localStorage.getItem('checkoutSeatCode')  || "—";
+            const seatPrice = parseFloat(localStorage.getItem('checkoutSeatPrice') || "0");
+            document.getElementById('pill-seats').innerText       = seatCode;
+            document.getElementById('cart-seat-summary').innerText = seatCode;
+            document.getElementById('cart-seat-cost').innerText   = `$${seatPrice.toFixed(2)}`;
+
+            // Restore in-flight services from localStorage (if user navigated back)
+            const savedServices = localStorage.getItem('checkoutServicesJSON');
+            if (savedServices) {
+                try {
+                    const parsed = JSON.parse(savedServices);
+                    parsed.forEach(item => chosenServices.push(item));
+                } catch(e) { /* ignore */ }
+            }
+            renderServicesCart();
+        };
+
+        // ── Category filter ──────────────────────────────────────────
+        function filterServices(category) {
+            activeFilter = category;
+
+            // Update pill styles
+            document.querySelectorAll('.filter-pill').forEach(btn => {
+                btn.className = "filter-pill px-4 py-1.5 bg-white border border-gray-100 text-gray-500 font-bold text-[10px] tracking-wider uppercase rounded-full hover:bg-gray-50";
+            });
+            const activeBtn = document.getElementById(`filter-${category}`);
+            if (activeBtn) activeBtn.className = "filter-pill px-4 py-1.5 bg-gray-900 text-white font-bold text-[10px] tracking-wider uppercase rounded-full shadow-sm";
+
+            // Show/hide cards
+            document.querySelectorAll('.service-card').forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // ── Add to cart ──────────────────────────────────────────────
+        function addAncillaryItem(name, price, btnEl) {
+            chosenServices.push({ name, price });
+            // Button pop feedback
+            if (btnEl) {
+                btnEl.classList.add('item-added');
+                btnEl.addEventListener('animationend', () => btnEl.classList.remove('item-added'), { once: true });
+            }
+            renderServicesCart();
+        }
+
+        // ── Render cart ──────────────────────────────────────────────
+        function renderServicesCart() {
+            const cartTarget = document.getElementById('services-cart-list');
+            cartTarget.innerHTML = "";
+
+            let sumTotal = 0;
+            chosenServices.forEach((item, index) => {
+                sumTotal += item.price;
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-gray-50 p-2 rounded-xl border border-gray-100";
+                row.innerHTML = `
+                    <span class="text-gray-800 truncate pr-2">${item.name}</span>
+                    <div class="flex items-center space-x-3 flex-shrink-0">
+                        <span class="text-gray-900 font-bold">$${item.price.toFixed(2)}</span>
+                        <button onclick="removeAncillaryItem(${index})" class="text-red-400 hover:text-red-600 font-bold font-sans leading-none">&times;</button>
+                    </div>
+                `;
+                cartTarget.appendChild(row);
+            });
+
+            if (chosenServices.length === 0) {
+                cartTarget.innerHTML = `<p class="text-gray-300 font-normal italic text-center py-4">No ancillary services added yet.</p>`;
+            }
+
+            document.getElementById('services-cart-total').innerText = `$${sumTotal.toFixed(2)}`;
+
+            // Persist to localStorage immediately on every cart change
+            localStorage.setItem('checkoutServicesSum',  sumTotal.toFixed(2));
+            localStorage.setItem('checkoutServicesJSON', JSON.stringify(chosenServices));
+        }
+
+        function removeAncillaryItem(index) {
+            chosenServices.splice(index, 1);
+            renderServicesCart();
+        }
+
+        // ── commitSelectionWorkflow ──────────────────────────────────
+        // Validates that seats were chosen, then proceeds to payment.html
+        function commitSelectionWorkflow() {
+            const seatCode = localStorage.getItem('checkoutSeatCode');
+            if (!seatCode || seatCode.trim() === '' || seatCode === '—') {
+                alert("No seat has been selected yet. Please go back and choose your seat(s) before proceeding to payment.");
+                window.location.href = 'seat-selection.html';
+                return;
+            }
+
+            // Services data is already persisted on every cart change.
+            // Navigate to payment.
+            window.location.href = 'payment.html';
+        }
+    </script>
+</body>
+</html>

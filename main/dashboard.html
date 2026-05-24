@@ -368,7 +368,8 @@
                 localStorage.setItem('checkoutTravelers', travelers);
             }
 
-            window.location.href = 'booking-assets.html';
+            // UPDATED: routes to seat-selection.html instead of booking-assets.html
+            window.location.href = 'seat-selection.html';
         }
 
         // Handle recommended modal display
@@ -412,7 +413,8 @@
                 // IMPORTANT: Expose to Seat Selection Page logic
                 localStorage.setItem('checkoutTravelers', finalTravelers); 
 
-                window.location.href = 'booking-assets.html';
+                // UPDATED: routes to seat-selection.html instead of booking-assets.html
+                window.location.href = 'seat-selection.html';
             };
             
             document.getElementById('recommended-modal').classList.remove('hidden');
@@ -422,8 +424,11 @@
             document.getElementById('recommended-modal').classList.add('hidden');
         }
 
+        // UPDATED: handleNav now routes properly instead of showing alerts
         function handleNav(tab) {
-            alert(`Navigation request dispatched to view: [${tab.toUpperCase()}].`);
+            if (tab === 'book')         return; // already on this page
+            if (tab === 'reservations') window.location.href = 'reservations.html';
+            if (tab === 'services')     window.location.href = 'seat-selection.html';
         }
     </script>
 </body>

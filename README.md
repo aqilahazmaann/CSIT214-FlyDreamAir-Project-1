@@ -6,20 +6,21 @@ FlyDreamAir is a comprehensive airline management system developed as part of **
 
 ## 2. Features
 
-* **Flight Search:** Supports domestic and international route searching by origin, destination, and date.
-* **Dynamic Booking Flow:** A multi-stage state-driven booking system:
+* **Flight Search:** Supports domestic and international route searching.
+* **Modular Booking Flow:** A sophisticated, multi-stage booking process separated for better maintainability:
 1. **Dashboard:** Search and select flights.
 2. **Passenger Management:** Capture and validate passenger details.
-3. **Booking Assets:** Choose seats and add ancillary in-flight services.
-4. **Checkout & Payment:** Secure transaction simulation.
-5. **Reservations:** View, modify, or cancel existing itineraries.
+3. **Seat Selection:** Interactive grid for choosing cabin seating.
+4. **In-Flight Services:** Ancillary service customization.
+5. **Checkout & Payment:** Secure transaction simulation.
 
 
-* **State Persistence:** Uses `localStorage` to bridge data between separate HTML modules, simulating backend session management.
+* **Secure Administration:** Role-Based Access Control (RBAC) simulation for back-office management.
+* **State Persistence:** Uses `localStorage` to bridge data between distinct HTML modules, simulating backend session management.
 
 ## 3. Technology Stack
 
-* **Frontend:** HTML5, Tailwind CSS (for rapid UI development).
+* **Frontend:** HTML5, Tailwind CSS (Custom 'blurple' and 'safetyOrange' branding).
 * **Logic:** Vanilla JavaScript (ES6+).
 * **State Management:** LocalStorage API.
 
@@ -38,18 +39,23 @@ FlyDreamAir is a comprehensive airline management system developed as part of **
 ## 5. Getting Started
 
 1. **Clone the repository** to your local machine.
-2. **Open `Authentication.html**` in any modern web browser to start the user session.
-3. **Default Credentials:** Users can register or use existing mock data (`john@example.com` / `password123`).
+2. **Authentication:** Open `Authentication.html` to log in or register.
+* **User Access:** Use registered credentials (or `john@example.com` / `password123`).
+* **Admin Access:** Use the "Login as Administration" button (Credentials: `admin@flydreamair.com` / `securepassword123`).
+
+
 
 ## 6. Project Structure
 
 ```text
 /
-├── Authentication.html   # Login & User Registration
-├── dashboard.html        # Flight Search Interface
-├── booking-assets.html   # Seat & Services Logic
-├── payment.html          # Transaction Processing
-├── reservations.html     # My Bookings View
-└── docs/                 # Project Charter, WBS, and Risk Reports
+├── Authentication.html     # Login, Registration & Admin Gateway
+├── admin.html              # Back-Office Admin Dashboard (Protected)
+├── dashboard.html          # Flight Search Interface
+├── seat-selection.html     # Modular Seat Selection
+├── inflight-services.html  # Modular Ancillary Services
+├── payment.html            # Transaction Processing
+├── reservations.html       # My Bookings View
+└── docs/                   # Project Charter, WBS, and Risk Reports
 
 ```

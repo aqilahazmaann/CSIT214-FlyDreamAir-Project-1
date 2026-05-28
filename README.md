@@ -40,7 +40,7 @@ FlyDreamAir is a comprehensive airline management system developed as part of **
 
 1. **Clone the repository** to your local machine.
 2. **Authentication:** Open `Authentication.html` to log in or register.
-* **User Access:** Use registered credentials (or `john@example.com` / `password123`).
+* **Default Credentials:** Users can register or use existing mock data (`john@example.com` / `password123`).
 * **Admin Access:** Use the "Login as Administration" button (Credentials: `admin@flydreamair.com` / `securepassword123`).
 
 
